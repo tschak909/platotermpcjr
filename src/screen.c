@@ -12,6 +12,7 @@
 
 unsigned char CharWide=8;
 unsigned char CharHigh=16;
+unsigned char screen_mode;
 extern padBool FastText; /* protocol.c */
 padPt TTYLoc;
 uint8_t FONT_SIZE_X;
@@ -31,8 +32,21 @@ unsigned char fontm23[768];
  */
 void screen_init(void)
 {
-  mode(PCJR_320_200_16);
+#ifdef OLIVETTI
+  screen_mode=OLIVETTI_640_400_2;
   background(1);
+  width=640;
+  height=400;
+  FONT_SIZE_X=8;
+  FONT_SIZE_Y=12;
+  font=&font_640x400;
+  scalex=&scalex_640;
+  scaley=&scaley_400;
+  fontptr=&fontptr_12;
+#endif
+ 
+#ifdef PCJR
+  screen_mode=PCJR_320_200_16;
   width=320;
   height=200;
   FONT_SIZE_X=5;
@@ -41,6 +55,9 @@ void screen_init(void)
   scalex=&scalex_320;
   scaley=&scaley_200;
   fontptr=&fontptr_6;
+#endif
+
+  mode(screen_mode);
 }
 
 /**
@@ -55,8 +72,7 @@ void screen_beep(void)
  */
 void screen_clear(void)
 {
-  mode(PCJR_320_200_16);
-  /* bar(0,0,319,199,current_background); */
+  mode(screen_mode);
   background(current_background);
 }
 
@@ -339,6 +355,16 @@ unsigned char screen_color(padRGB* theColor)
   newGreen=(theColor->green*0.008);
   newBlue=(theColor->blue*0.008);
 
+#ifdef MONO
+  if ((theColor->red==0) && (theColor->green==0) && (theColor->blue==0))
+    {
+      return 0;
+    }
+  else
+    {
+      return 1;
+    }
+#else
   if ((newRed==0) && (newGreen==0) && (newBlue==0))
     return BLACK;
   else if ((newRed==1) && (newGreen==1) && (newBlue==1))
@@ -369,8 +395,8 @@ unsigned char screen_color(padRGB* theColor)
     return YELLOW;
   else if ((newRed==2) && (newGreen==2) && (newBlue==2))
     return WHITE;
-
   return WHITE;
+#endif
 }
 
 /**

@@ -2,6 +2,7 @@
 #define BIOSGFX_H
 
 #define PCJR_320_200_16 0x09
+#define OLIVETTI_640_400_2 0x40
 
 #define BLACK        0
 #define BLUE         1

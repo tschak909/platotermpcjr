@@ -18,19 +18,19 @@ void io_init(void)
   int86(SERIAL, &regs, &regs);
   
   // Set line characteristics. 
-  regs.h.al = 0x04; // 1200bps
+  regs.h.al = 0x07; // 1200bps
   regs.h.al = (regs.h.al < 5) | 0x03;   /* 8/N/1 */
   regs.x.dx = PORT;
   regs.h.ah = 0x00;
   int86(SERIAL,&regs,&regs);
 
   /* // Set RTS/CTS Flow control */
-  /* regs.h.ah = 0x0f; */
-  /* regs.h.al = 0x02; */
-  /* regs.x.dx = PORT; */
-  /* int86(SERIAL,&regs,&regs); */
+  regs.h.ah = 0x0f;
+  regs.h.al = 0x02;
+  regs.x.dx = PORT;
+  int86(SERIAL,&regs,&regs);
 
-  /* io_raise_dtr(); */
+  io_raise_dtr();
 }
 
 void io_send_byte(unsigned char b)
@@ -44,26 +44,26 @@ void io_send_byte(unsigned char b)
 void io_lower_dtr(void)
 {
   /* // Lower DTR */
-  /* regs.h.ah = 0x06; */
-  /* regs.h.al = 0x00; */
-  /* regs.x.dx = config.port; */
-  /* int86(SERIAL,&regs,&regs);   */
+  regs.h.ah = 0x06;
+  regs.h.al = 0x00;
+  regs.x.dx = PORT;
+  int86(SERIAL,&regs,&regs);
 }
 
 void io_raise_dtr(void)
 {
   /* // Raise DTR */
-  /* regs.h.ah = 0x06; */
-  /* regs.h.al = 0x01; */
-  /* regs.x.dx = config.port; */
-  /* int86(SERIAL,&regs,&regs); */
+  regs.h.ah = 0x06;
+  regs.h.al = 0x01;
+  regs.x.dx = PORT;
+  int86(SERIAL,&regs,&regs);
 }
 
 void io_hang_up(void)
 {
-  /* io_lower_dtr(); */
-  /* delay(500); */
-  /* io_raise_dtr(); */
+  io_lower_dtr();
+  delay(500);
+  io_raise_dtr();
 }
 
 void io_main(void)
@@ -88,10 +88,10 @@ void io_main(void)
 
 void io_done(void)
 {
-  /* io_hang_up(); */
+  io_hang_up();
   
-  /* // Deinitialize driver. */
-  /* regs.h.ah = 0x05; */
-  /* regs.x.dx = config.port; */
-  /* int86(SERIAL,&regs,&regs); */
+  // Deinitialize driver.
+  regs.h.ah = 0x05;
+  regs.x.dx = PORT;
+  int86(SERIAL,&regs,&regs);
 }

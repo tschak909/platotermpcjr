@@ -258,23 +258,54 @@ void terminal_ext_out(padByte value)
  */
 void terminal_char_load(padWord charnum, charData theChar)
 {
-  // Clear char data. 
+#ifdef OLIVETTI
   memset(char_data,0,sizeof(char_data));
-  memset(PIX_WEIGHTS,0,sizeof(PIX_WEIGHTS));
-  memset(&fontm23[charnum*FONT_SIZE_Y],0,6);
   
-  // Transpose character data.  
+  // load and transpose character data into 8x16 array  
   for (curr_word=0;curr_word<8;curr_word++)
     {
       for (u=16; u-->0; )
 	{
 	  if (theChar[curr_word] & 1<<u)
 	    {
-	      pix_cnt++;
-	      PIX_WEIGHTS[TAB_0_25[TAB_0_5[u]]+TAB_0_4[curr_word]]++;
 	      char_data[u^0x0F&0x0F]|=BTAB[curr_word];
 	    }
 	}
+    }
+
+  // OR pixel rows together
+  fontm23[(charnum*12)+0]=char_data[0]<<8;
+  fontm23[(charnum*12)+1]=char_data[1]<<8;
+  fontm23[(charnum*12)+2]=char_data[2]|char_data[3]<<8;
+  fontm23[(charnum*12)+3]=char_data[4]<<8;
+  fontm23[(charnum*12)+4]=char_data[5]<<8;
+  fontm23[(charnum*12)+5]=char_data[6]|char_data[7]<<8;
+  fontm23[(charnum*12)+6]=char_data[8]<<8;
+  fontm23[(charnum*12)+7]=char_data[9]<<8;
+  fontm23[(charnum*12)+8]=char_data[10]|char_data[11]<<8;
+  fontm23[(charnum*12)+9]=char_data[12]<<8;
+  fontm23[(charnum*12)+10]=char_data[13]<<8;
+  fontm23[(charnum*12)+11]=char_data[14]|char_data[15]<<8;
+#endif
+
+#ifdef PCJR
+  // Clear char data.
+  memset(char_data,0,sizeof(char_data));
+  memset(PIX_WEIGHTS,0,sizeof(PIX_WEIGHTS));
+  memset(&fontm23[charnum*FONT_SIZE_Y],0,6);
+  
+  // Transpose character data.
+  for (curr_word=0;curr_word<8;curr_word++)
+    {
+      for (u=16; u-->0; )
+  	{
+  	  if (theChar[curr_word] & 1<<u)
+  	    {
+  	      pix_cnt++;
+  	      PIX_WEIGHTS[TAB_0_25[TAB_0_5[u]]+TAB_0_4[curr_word]]++;
+  	      char_data[u^0x0F&0x0F]|=BTAB[curr_word];
+  	    }
+  	}
     }
 
   // Determine algorithm to use for number of pixels.
@@ -296,16 +327,17 @@ void terminal_char_load(padWord charnum, charData theChar)
     {
       // Algorithm B - Sparsely or heavily populated bitmaps
       for (u=16; u-->0; )
-	{
-	  for (v=8; v-->0; )
-	    {
-	      if (char_data[u] & (1<<v))
-		{
-		  fontm23[(charnum*FONT_SIZE_Y)+TAB_0_5i[u]]|=BTAB_5[v];
-		}
-	    }
-	}
+  	{
+  	  for (v=8; v-->0; )
+  	    {
+  	      if (char_data[u] & (1<<v))
+  		{
+  		  fontm23[(charnum*FONT_SIZE_Y)+TAB_0_5i[u]]|=BTAB_5[v];
+  		}
+  	    }
+  	}
     }
+#endif  
 }
 
 /**
