@@ -26,6 +26,7 @@ uint16_t height;
 unsigned char current_foreground=WHITE;
 unsigned char current_background=BLACK;
 unsigned char fontm23[768];
+unsigned char is_mono=0;
 
 /**
  * screen_init() - Set up the screen
@@ -43,8 +44,25 @@ void screen_init(void)
   scalex=&scalex_640;
   scaley=&scaley_400;
   fontptr=&fontptr_12;
+  is_mono=true;
 #endif
- 
+
+#ifdef TANDY_2000
+  if (is_mono==true)
+    screen_mode=TANDY2000_640_400_2;
+  else
+    screen_mode=TANDY2000_640_400_16;
+  background(1);
+  width=640;
+  height=400;
+  FONT_SIZE_X=8;
+  FONT_SIZE_Y=12;
+  font=&font_640x400;
+  scalex=&scalex_640;
+  scaley=&scaley_400;
+  fontptr=&fontptr_12;
+#endif
+  
 #ifdef PCJR
   screen_mode=PCJR_320_200_16;
   width=320;
@@ -355,48 +373,51 @@ unsigned char screen_color(padRGB* theColor)
   newGreen=(theColor->green*0.008);
   newBlue=(theColor->blue*0.008);
 
-#ifdef MONO
-  if ((theColor->red==0) && (theColor->green==0) && (theColor->blue==0))
+  if (is_mono==1)
     {
-      return 0;
+      if ((theColor->red==0) && (theColor->green==0) && (theColor->blue==0))
+	{
+	  return 0;
+	}
+      else
+	{
+	  return 1;
+	}
     }
   else
     {
-      return 1;
+      if ((newRed==0) && (newGreen==0) && (newBlue==0))
+	return BLACK;
+      else if ((newRed==1) && (newGreen==1) && (newBlue==1))
+	return LIGHTGREY;
+      else if ((newRed==0) && (newGreen==0) && (newBlue==1))
+	return BLUE;
+      else if ((newRed==0) && (newGreen==0) && (newBlue==2))
+	return LIGHTBLUE;
+      else if ((newRed==0) && (newGreen==1) && (newBlue==0))
+	return GREEN;
+      else if ((newRed==0) && (newGreen==2) && (newBlue==0))
+	return LIGHTGREEN;
+      else if ((newRed==0) && (newGreen==1) && (newBlue==1))
+	return CYAN;
+      else if ((newRed==0) && (newGreen==2) && (newBlue==2))
+	return LIGHTCYAN;
+      else if ((newRed==1) && (newGreen==0) && (newBlue==0))
+	return RED;
+      else if ((newRed==2) && (newGreen==0) && (newBlue==0))
+	return LIGHTRED;
+      else if ((newRed==1) && (newGreen==0) && (newBlue==1))
+	return MAGENTA;
+      else if ((newRed==2) && (newGreen==0) && (newBlue==2))
+	return LIGHTMAGENTA;
+      else if ((newRed==1) && (newGreen==1) && (newBlue==0))
+	return BROWN;
+      else if ((newRed==2) && (newGreen==2) && (newBlue==0))
+	return YELLOW;
+      else if ((newRed==2) && (newGreen==2) && (newBlue==2))
+	return WHITE;
     }
-#else
-  if ((newRed==0) && (newGreen==0) && (newBlue==0))
-    return BLACK;
-  else if ((newRed==1) && (newGreen==1) && (newBlue==1))
-    return LIGHTGREY;
-  else if ((newRed==0) && (newGreen==0) && (newBlue==1))
-    return BLUE;
-  else if ((newRed==0) && (newGreen==0) && (newBlue==2))
-    return LIGHTBLUE;
-  else if ((newRed==0) && (newGreen==1) && (newBlue==0))
-    return GREEN;
-  else if ((newRed==0) && (newGreen==2) && (newBlue==0))
-    return LIGHTGREEN;
-  else if ((newRed==0) && (newGreen==1) && (newBlue==1))
-    return CYAN;
-  else if ((newRed==0) && (newGreen==2) && (newBlue==2))
-    return LIGHTCYAN;
-  else if ((newRed==1) && (newGreen==0) && (newBlue==0))
-    return RED;
-  else if ((newRed==2) && (newGreen==0) && (newBlue==0))
-    return LIGHTRED;
-  else if ((newRed==1) && (newGreen==0) && (newBlue==1))
-    return MAGENTA;
-  else if ((newRed==2) && (newGreen==0) && (newBlue==2))
-    return LIGHTMAGENTA;
-  else if ((newRed==1) && (newGreen==1) && (newBlue==0))
-    return BROWN;
-  else if ((newRed==2) && (newGreen==2) && (newBlue==0))
-    return YELLOW;
-  else if ((newRed==2) && (newGreen==2) && (newBlue==2))
-    return WHITE;
   return WHITE;
-#endif
 }
 
 /**

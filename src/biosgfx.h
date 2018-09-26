@@ -1,6 +1,8 @@
 #ifndef BIOSGFX_H
 #define BIOSGFX_H
 
+#define TANDY2000_640_400_16 0x08
+#define TANDY2000_640_400_2 0x09
 #define PCJR_320_200_16 0x09
 #define OLIVETTI_640_400_2 0x40
 
