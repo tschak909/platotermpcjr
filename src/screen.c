@@ -3,6 +3,7 @@
 #include "biosgfx.h"
 #include "font.h"
 #include "scale.h"
+#include "log.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -34,47 +35,104 @@ unsigned char is_mono=0;
 void screen_init(void)
 {
 #ifdef OLIVETTI
+  log("screen_init_for_olivetti\r\n");
   screen_mode=OLIVETTI_640_400_2;
-  background(1);
+  log("screen mode set to 0x%02x\r\n",screen_mode);
   width=640;
+  log("width %d\r\n",width);
   height=400;
+  log("height %d\r\n",height);
   FONT_SIZE_X=8;
+  log("font X size: %d\r\n",FONT_SIZE_X);
   FONT_SIZE_Y=12;
+  log("font Y size: %d\r\n",FONT_SIZE_Y);
   font=&font_640x400;
+  log("Font set to 8x12 640x400 font\r\n");
   scalex=&scalex_640;
+  log("scalex set to scalex_640\r\n");
   scaley=&scaley_400;
+  log("scaley set to scaley_400\r\n");
   fontptr=&fontptr_12;
+  log("fontptr set to fontptr_12\r\n");
   is_mono=true;
+  log("is_mono = %d\r\n",is_mono);
 #endif
 
-#ifdef TANDY_2000
-  if (is_mono==true)
-    screen_mode=TANDY2000_640_400_2;
-  else
-    screen_mode=TANDY2000_640_400_16;
-  background(1);
+#ifdef SANYO_MBC550
+  screen_mode=0x03; // TBD
+  log("screen_init for mbc550, mode 0x%02x\r\n",screen_mode);
   width=640;
-  height=400;
+  log("width: %d\r\n",width);
+  height=200;
+  log("height: %d\r\n",height);
   FONT_SIZE_X=8;
-  FONT_SIZE_Y=12;
-  font=&font_640x400;
+  log("font size X: %d\r\n",FONT_SIZE_X);
+  FONT_SIZE_Y=6;
+  log("font size Y: %d\r\n",FONT_SIZE_Y);
+  font=&font_640x200;
+  log("font set to 8x6 640x200 font.\r\n");
   scalex=&scalex_640;
+  log("scalex set to scalex_640\r\n");
+  scaley=&scaley_200;
+  log("scaley set to scaley_200\r\n");
+  fontptr=&fontptr_6;
+  log("fontptr set to fontptr_6\r\n");
+  is_mono=true;
+  log("is_mono = %d\r\n\r\n",is_mono);
+#endif
+  
+#ifdef TANDY_2000
+  log("screen_init for tandy2k\r\n");
+  if (is_mono==true)
+    {
+      screen_mode=TANDY2000_640_400_2;
+      log("/MONO 640x400x2 mode selected. 0x%02x\r\n",screen_mode);
+    }
+  else
+    {
+      screen_mode=TANDY2000_640_400_16;
+      log("/COLOR 640x400x16 mode selected. 0x%02x\r\n",screen_mode);
+    }
+  width=640;
+  log("width: %d\r\n",width);
+  height=400;
+  log("height: %d\r\n",height);
+  FONT_SIZE_X=8;
+  log("font_size_x: %d\r\n",font_size_x);
+  FONT_SIZE_Y=12;
+  log("font_size_y: %d\r\n",font_size_y);
+  font=&font_640x400;
+  log("font set to 640x400 font\r\n");
+  scalex=&scalex_640;
+  log("font scalex set to scalex_640\r\n");
   scaley=&scaley_400;
+  log("font scaley set to scaley_400\r\n");
   fontptr=&fontptr_12;
+  log("fontptr set to fontptr_12\r\n");
 #endif
   
 #ifdef PCJR
+  log("screen_init for pcjr\r\n");
   screen_mode=PCJR_320_200_16;
+  log("screen_mode set to 0x%02x\r\n",screen_mode);
   width=320;
+  log("width: %d\r\n",width);
   height=200;
+  log("height: %d\r\n",height);
   FONT_SIZE_X=5;
+  log("font size X: %d\r\n",FONT_SIZE_X);
   FONT_SIZE_Y=6;
+  log("font size Y: %d\r\n",FONT_SIZE_Y);
   font=&font_320x200;
+  log("font set to 5x6 320x200\r\n");
   scalex=&scalex_320;
+  log("scalex table set to scalex_320\r\n");
   scaley=&scaley_200;
+  log("scaley table set to scaley_200\r\n");
   fontptr=&fontptr_6;
+  log("fontptr set to fontptr_6\r\n");
 #endif
-
+  log("about to set set mode: 0x%02x\r\n",screen_mode);
   mode(screen_mode);
 }
 
@@ -91,7 +149,7 @@ void screen_beep(void)
 void screen_clear(void)
 {
   mode(screen_mode);
-  background(current_background);
+  /* background(current_background); */
 }
 
 /**
@@ -111,7 +169,7 @@ void screen_block_draw(padPt* Coord1, padPt* Coord2)
     current_foreground=current_background;
   else
     current_foreground=current_foreground;
-  
+
   bar(scalex[Coord1->x],scaley[Coord1->y],scalex[Coord2->x],scaley[Coord2->y],current_foreground);
 }
 
@@ -380,8 +438,12 @@ unsigned char screen_color(padRGB* theColor)
 	  return 0;
 	}
       else
-	{
+        {
+#ifdef SANYO_MBC550
+	  return 2; // emulating CGA I guess...
+#else
 	  return 1;
+#endif
 	}
     }
   else

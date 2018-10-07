@@ -10,6 +10,7 @@
 #include "keyboard.h"
 #include "screen.h"
 #include "terminal.h"
+#include "biosgfx.h"
 
 void keyboard_out(unsigned char platoKey)
 {
@@ -58,22 +59,12 @@ void keyboard_main(void)
       if (ch==0x00) // Extended key.
 	{
 	  ch=getch();
-	  /* if (ch==0x2d) // alt-x */
-	  /*   { */
-	  /*     prefs_clear(); */
-	  /*     prefs_display("Exit PLATOTERM (Y/N)? "); */
-	  /*     ch=prefs_get_key_matching("ynYN"); */
-	  /*     switch(ch) */
-	  /* 	{ */
-	  /* 	case 'y': */
-	  /* 	  touch_done(); */
-	  /* 	  screen_done(); */
-	  /* 	  exit(0); */
-	  /* 	  break; */
-	  /* 	case 'n': */
-	  /* 	  prefs_done(); */
-	  /* 	} */
-	  /*   } */
+	  if (ch==0x2d) // alt-x
+	    {
+	      io_done();
+	      mode(0x03);
+	      exit(0);
+	    }
 	  /* else if (ch==0x23) // alt-h */
 	  /*   { */
 	  /*     prefs_clear(); */
